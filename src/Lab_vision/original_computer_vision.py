@@ -15,18 +15,16 @@
 from Vision import Vision
 from Ransac import RANSAC
 
-Obj = Vision('..\..\Images\\new.jpg', 1)
+Obj = Vision('..\..\Images\\new.jpg', 5)
 x0, y0 = Obj.first_center_position()
 print(x0, y0)
 
 # Need to return data separately into x_data and y_data
 inner_points, outer_points = Obj.inner_outer_points()
 
-ransac = RANSAC(Obj, inner_points, outer_points, 20)
+ransac = RANSAC(Obj, inner_points, outer_points, 50)
 final_inner, final_outer = ransac.outlier_remover()
 
 # Connecting all of the filtered inner and outer points of the coil, excluding the tail points.
 # ransac.point_connector(final_inner, final_outer)
 
-# ransac2 = RANSAC(np.array(ransac.final_inner_points), np.array(ransac.final_outer_points), 50)
-# ransac2.outlier_remover()

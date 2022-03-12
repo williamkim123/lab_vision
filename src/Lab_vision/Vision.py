@@ -89,7 +89,7 @@ class Vision:
         self.inner_points = []
         self.outer_points = []
         for angle in np.arange(0, 360, self.angle_of_contact):
-            if angle < 90:
+            if angle < 65:
                 continue
             elif angle > 270:
                 continue
@@ -116,9 +116,8 @@ class Vision:
             '''
             Storing the differentiation values sorted in the order of smallest x distance to greatest.
             '''
-
-            plt.figure("Just the intensities")
-            plt.plot(x1[:-1])
+            # plt.figure("Just the intensities")
+            # plt.plot(x1[:-1])
 
             '''
             Finding the outlier and inlier points using local min/max
