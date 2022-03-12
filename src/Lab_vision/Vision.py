@@ -61,6 +61,9 @@ class Vision:
         moment = cv2.moments(self.resized_img)
         X = int(moment['m10'] / moment["m00"])
         Y = int(moment["m01"] / moment["m00"])
+        # TODO this needs my attention
+        X = 427
+        Y = 308
         # cv2.circle(self.resized_img, (X,Y), 2, (205,114,101), 5)
         print(f' Moments Coordinate: ({X},{Y})')
 
@@ -86,14 +89,15 @@ class Vision:
         self.inner_points = []
         self.outer_points = []
         for angle in np.arange(0, 360, self.angle_of_contact):
-            # if 45<angle<90:
-            #     continue
+            if angle < 90:
+                continue
+            elif angle > 270:
+                continue
             endy = self.y0 + length * math.sin(math.radians(angle))
             endx = self.x0 + length * math.cos(math.radians(angle))
             points.append((endx, endy, angle))
 
         for i, point in enumerate(points[:]):
-            # a = Obj.createLineIterator((x0, y0), point, Obj.resized_img)
             p = list(bresenham(self.x0, self.y0, int(point[0]), int(point[1])))
             intensity = []
             for pnt in p:
@@ -103,9 +107,8 @@ class Vision:
                     intensity.append([pnt[0], pnt[1], self.resized_img[pnt[1], pnt[0]]])
 
             a = np.array(intensity)
-            # print(a)
-
-            # plt.plot([x0, point[0]], [y0,  point[1]], 'r')
+            plt.imshow(self.resized_img)
+            plt.plot([self.x0, point[0]], [self.y0,  point[1]], 'r')
             x1 = np.diff(a[:, 2])
             # yo = np.array(x1)
             # print(y0)
@@ -113,22 +116,19 @@ class Vision:
             '''
             Storing the differentiation values sorted in the order of smallest x distance to greatest.
             '''
-            # plt.figure("Just the intensities")
-            # plt.plot(x1[:-1])
+
+            plt.figure("Just the intensities")
+            plt.plot(x1[:-1])
 
             '''
             Finding the outlier and inlier points using local min/max
             self.inner_points.append(a[np.argmax(x1), :2])
             '''
-            if 0 < point[2] < 0:
+            if 0 < point[2] < 90:
                 pass
 
-            elif 0 < point[2] < 0:
+            elif 275 < point[2] < 360:
                 pass
-            # include all
-            # elif == 0:
-            #     self.outer_points.append(a[np.argmin(x1), :2])
-            #     self.inner_points.append(a[np.argmax(x1), :2])
             else:
                 self.outer_points.append(a[np.argmin(x1), :2])
                 self.inner_points.append(a[np.argmax(x1), :2])

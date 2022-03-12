@@ -22,7 +22,7 @@ print(x0, y0)
 # Need to return data separately into x_data and y_data
 inner_points, outer_points = Obj.inner_outer_points()
 
-ransac = RANSAC(Obj, inner_points, outer_points, 50)
+ransac = RANSAC(Obj, inner_points, outer_points, 20)
 final_inner, final_outer = ransac.outlier_remover()
 
 # Connecting all of the filtered inner and outer points of the coil, excluding the tail points.

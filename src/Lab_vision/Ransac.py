@@ -59,17 +59,15 @@ class RANSAC(Vision):
         pt2 = sampling_points[1]
         pt3 = sampling_points[2]
 
-        # Need to understand this code
+        # TODO Need to understand this code
         a = np.array([[pt2[0] - pt1[0], pt2[1] - pt1[1]], [pt3[0] - pt2[0], pt3[1] - pt2[1]]])
         b = np.array([[pt2[0] ** 2 - pt1[0] ** 2 + pt2[1] ** 2 - pt1[1] ** 2],
                       [pt3[0] ** 2 - pt2[0] ** 2 + pt3[1] ** 2 - pt2[1] ** 2]])
-        # There is problem with the inverse operation on the code
+        # TODO There is problem with the inverse operation on the code
         inv_A = inv(a)
-
         c_x, c_y = np.dot(inv_A, b) / 2
         c_x, c_y = c_x[0], c_y[0]
         r = np.sqrt((c_x - pt1[0]) ** 2 + (c_y - pt1[1]) ** 2)
-
         return c_x, c_y, r
 
     def evaluate_model(self, model, sample):
@@ -176,19 +174,6 @@ class RANSAC(Vision):
             if dist < 1.1 * rad2 and dist > 0.9 * rad2:
                 final_inner_points.append(point)
         self.final_inner_points = final_inner_points
-
-        # '''
-        # Tail position.
-        # '''
-        # # tail position
-        # test_list = np.array(self.inner_points)
-        # final_tail_points = []
-        # for point in test_list:
-        #     dist = np.hypot(point[0] - point3, point[1] - point4)
-        #     if dist > rad1:
-        #         final_tail_points.append(point)
-        #
-        # self.final_tail_points = final_tail_points
 
         self.plot_points(point1,point2,rad1,point3,point4,rad2)
 
