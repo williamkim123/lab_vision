@@ -53,7 +53,7 @@ class Vision:
         self.width = 800
         self.height = 600
         dimension = (self.width, self.height)
-        print(dimension)
+        # print(dimension)
         self.resized_img = cv2.resize(self.img, dimension, interpolation=cv2.INTER_LINEAR)
 
         # Get the moments of the image and set that point as the initial point of the array
@@ -65,7 +65,7 @@ class Vision:
         X = 427
         Y = 308
         # cv2.circle(self.resized_img, (X,Y), 2, (205,114,101), 5)
-        print(f' Moments Coordinate: ({X},{Y})')
+        # print(f' Moments Coordinate: ({X},{Y})')
 
         # make moments a member
         self.moments = ((X, Y))
@@ -80,18 +80,20 @@ class Vision:
         connects the user input to this module
         '''
         # The x0, y0 needs to be the moments of the circle and x1, y1 needs to be the second point of the angle
-        # length = np.sqrt((Obj.width - x0) ** 2 + (Obj.height - y0) ** 2)/2
-        length = self.height / 2
+        length = np.sqrt((self.width - self.x0) ** 2 + (self.height - self.y0) ** 2)
+        length = 300
         '''
         Is this because it is not finding the local minima?
         '''
         points = []
         self.inner_points = []
         self.outer_points = []
-        for angle in np.arange(0, 360, self.angle_of_contact):
-            if angle < 65:
+        for angle in np.arange(360, 0, -self.angle_of_contact):
+            if angle > 270:
                 continue
-            elif angle > 270:
+            # elif 170 < angle < 190:
+            #     continue
+            elif angle < 65:
                 continue
             endy = self.y0 + length * math.sin(math.radians(angle))
             endx = self.x0 + length * math.cos(math.radians(angle))
@@ -101,6 +103,7 @@ class Vision:
             p = list(bresenham(self.x0, self.y0, int(point[0]), int(point[1])))
             intensity = []
             for pnt in p:
+                # Setting the boundaries for where the rays should reach
                 if pnt[0] >= self.width or pnt[1] >= self.height or pnt[0] < 0 or pnt[1] < 0:
                     continue
                 else:
@@ -110,27 +113,34 @@ class Vision:
             plt.imshow(self.resized_img)
             plt.plot([self.x0, point[0]], [self.y0,  point[1]], 'r')
             x1 = np.diff(a[:, 2])
-            # yo = np.array(x1)
-            # print(y0)
-            # print(type(yo))
-            '''
-            Storing the differentiation values sorted in the order of smallest x distance to greatest.
-            '''
+            # Storing the differentiation values sorted in the order of smallest x distance to greatest.
+            # TODO introduce a data structure like stack or queue to make this more efficient
+            # for i, intensity_value in enumerate(intensity[:]):
+            #     print("Intensity values", intensity_value[2])
+            #     d_measurement = np.hypot(self.x0, intensity_value[0])
+
+
             # plt.figure("Just the intensities")
             # plt.plot(x1[:-1])
 
-            '''
-            Finding the outlier and inlier points using local min/max
+            # Finding the outlier and inlier points using local min/max
+            # Only storing the data points that we want to append onto the list
+            # self.inner_points.append(a[np.argmax(x1), :2])
             self.inner_points.append(a[np.argmax(x1), :2])
-            '''
-            if 0 < point[2] < 90:
-                pass
+            x2 = x1.copy()
+            x2[x2>-10] = 0
+            # self.outer_points.append(a[np.argmin(x1), :2])
+            index = x2.shape[0]-np.argmin(np.flip(x2))
+            # if index < 200:
+            #     continue
+            self.outer_points.append(a[index, :2])
 
-            elif 275 < point[2] < 360:
-                pass
-            else:
-                self.outer_points.append(a[np.argmin(x1), :2])
-                self.inner_points.append(a[np.argmax(x1), :2])
+
+
+
+            plt.plot(self.inner_points[-1][0], self.inner_points[-1][1], 'ro')
+            plt.plot(self.outer_points[-1][0], self.outer_points[-1][1], 'bo')
+            # plt.show()
 
         plt.figure("Image Plot")
         inner_points = np.array(self.inner_points)

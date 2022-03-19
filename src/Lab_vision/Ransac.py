@@ -47,6 +47,7 @@ class RANSAC(Vision):
             if count == 3:
                 break
 
+        # print(sample)
         return sampling_points
 
     def model_create(self, sampling_points):
@@ -59,6 +60,7 @@ class RANSAC(Vision):
         pt2 = sampling_points[1]
         pt3 = sampling_points[2]
 
+        # calculating A, B, C value from three points by using matrix
         # TODO Need to understand this code
         a = np.array([[pt2[0] - pt1[0], pt2[1] - pt1[1]], [pt3[0] - pt2[0], pt3[1] - pt2[1]]])
         b = np.array([[pt2[0] ** 2 - pt1[0] ** 2 + pt2[1] ** 2 - pt1[1] ** 2],
@@ -183,8 +185,6 @@ class RANSAC(Vision):
         '''
         Connects the points of the inlier and the outlier points after the ransac has finished running. The inlier
         points and outlier points should the newly updated lists from outlier_remover()
-
-        Note the graph looks inverted when printed.
         '''
         # printing the final result of the inner points after ransac algorithm
         x = [point[0] for point in final_inner]

@@ -14,17 +14,23 @@
 # Computer Vision libary
 from Vision import Vision
 from Ransac import RANSAC
+from Ransac_Trial import RANSAC_TRIALS
 
-Obj = Vision('..\..\Images\\new.jpg', 5)
+Obj = Vision('..\..\Images\\new.jpg', 1)
 x0, y0 = Obj.first_center_position()
 print(x0, y0)
 
 # Need to return data separately into x_data and y_data
 inner_points, outer_points = Obj.inner_outer_points()
 
-ransac = RANSAC(Obj, inner_points, outer_points, 50)
-final_inner, final_outer = ransac.outlier_remover()
+trial = RANSAC_TRIALS(Obj,inner_points, outer_points, x0, y0, 5)
+trial.circle_detection()
+# ransac = RANSAC(Obj, inner_points, outer_points, 50)
+# final_inner, final_outer = ransac.outlier_remover()
 
+'''
+Need to make a file system that deletes and adds files/images every iteration.
+'''
 # Connecting all of the filtered inner and outer points of the coil, excluding the tail points.
 # ransac.point_connector(final_inner, final_outer)
 
