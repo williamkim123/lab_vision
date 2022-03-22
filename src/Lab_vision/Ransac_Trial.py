@@ -22,15 +22,15 @@ from Vision import Vision
 import matplotlib.pyplot as plt
 import numpy as np
 
-class RANSAC_TRIALS(Vision):
+class RANSAC_Half_Circle(Vision):
     '''
     For now RANSAC_TRIALS is only for the outer points.
+    Need to make a separate class to get the data points in Excel file.
     '''
 
-    def __init__(self, Obj,innerpoints, outerpoints: list, x0, y0, n_iteration: int):
+    def __init__(self, Obj,innerpoints, outerpoints: list, x0, y0):
         self.outer_points = outerpoints
         self.inner_points = innerpoints
-        self.n = n_iteration
         self.x0 = x0
         self.y0 = y0
         self.obj = Obj
@@ -53,7 +53,7 @@ class RANSAC_TRIALS(Vision):
         plt.gca().add_patch(circle1)
 
         plt.plot(final_outer_points[:, 0], final_outer_points[:, 1], 'bo')
-        plt.plot(final_inner_points[:, 0], final_inner_points[:, 1], 'bo')
+        plt.plot(final_inner_points[:, 0], final_inner_points[:, 1], 'ro')
         plt.show()
 
 
@@ -66,19 +66,28 @@ class RANSAC_TRIALS(Vision):
 
         # guess radius should never exceed self.height//2
         guess_radius = []
+        # Drawing the line from 0 all the way up
         guess_radius.append(0)
         scores = []
+        # TODO: Need to first separate the outer and the inner detection algorithm and proceed to making the down and up pixels better.
         while guess_radius[-1] <= self.obj.height//2:
 
-            scores.append(np.where(np.logical_and(np.array(distance_radius) > guess_radius[-1] -20 , np.array(distance_radius) < guess_radius[-1] + 20))[0].shape[0])
+            # Taking out all the pixels 20 down and 20 up from the distance of the radius
+            scores.append(np.where(np.logical_and(np.array(distance_radius) > guess_radius[-1] -20 , np.array(distance_radius) < guess_radius[-1] + 22))[0].shape[0])
             guess_radius.append(guess_radius[-1] + 1)
 
         # final_radius = guess_radius[np.argmax(scores)]
         final_radius = np.array(guess_radius)[np.where(np.array(scores) == np.max(scores))[0]].mean()
 
-        final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius -20, np.array(distance_radius) < final_radius + 20))[0]]
-
+        final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius -10, np.array(distance_radius) < final_radius + 20))[0]]
         return final_radius, final_points
+
+    def circle_defection(self):
+        '''
+        Check how much the circles change everytime you run the script.
+        Check out the portion of the circle with the greatest area
+        '''
+        pass
 
 
 

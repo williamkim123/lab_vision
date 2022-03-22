@@ -80,6 +80,7 @@ class Vision:
         connects the user input to this module
         '''
         # The x0, y0 needs to be the moments of the circle and x1, y1 needs to be the second point of the angle
+        # TODO: Look into what is the best algorithm to detect the length of the rays that should be drawm.
         length = np.sqrt((self.width - self.x0) ** 2 + (self.height - self.y0) ** 2)
         length = 300
         '''
@@ -134,9 +135,6 @@ class Vision:
             # if index < 200:
             #     continue
             self.outer_points.append(a[index, :2])
-
-
-
 
             plt.plot(self.inner_points[-1][0], self.inner_points[-1][1], 'ro')
             plt.plot(self.outer_points[-1][0], self.outer_points[-1][1], 'bo')

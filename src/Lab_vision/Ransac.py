@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import inv
 
-class RANSAC(Vision):
+class RANSAC_Full_Circle(Vision):
     '''
     Inspired from: https://github.com/SeongHyunBae
     '''

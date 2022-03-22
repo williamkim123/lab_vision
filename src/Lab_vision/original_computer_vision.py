@@ -13,19 +13,19 @@
 
 # Computer Vision libary
 from Vision import Vision
-from Ransac import RANSAC
-from Ransac_Trial import RANSAC_TRIALS
+from Ransac import RANSAC_Full_Circle
+from Ransac_Trial import RANSAC_Half_Circle
 
-Obj = Vision('..\..\Images\\new.jpg', 1)
+Obj = Vision('..\..\Images\\new1.jpg', 1)
 x0, y0 = Obj.first_center_position()
 print(x0, y0)
 
 # Need to return data separately into x_data and y_data
 inner_points, outer_points = Obj.inner_outer_points()
 
-trial = RANSAC_TRIALS(Obj,inner_points, outer_points, x0, y0, 5)
+trial = RANSAC_Half_Circle(Obj,inner_points, outer_points, x0, y0)
 trial.circle_detection()
-# ransac = RANSAC(Obj, inner_points, outer_points, 50)
+# ransac = RANSAC_Full_Circle(Obj, inner_points, outer_points, 50)
 # final_inner, final_outer = ransac.outlier_remover()
 
 '''
