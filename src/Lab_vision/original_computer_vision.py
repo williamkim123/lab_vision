@@ -13,24 +13,29 @@
 
 # Computer Vision libary
 from Vision import Vision
-from Ransac import RANSAC_Full_Circle
-from Ransac_Trial import RANSAC_Half_Circle
+from Ransac import RANSAC
+from Outlier_Circle_Remover import Outlier_Detection
 
-Obj = Vision('..\..\Images\\new1.jpg', 1)
+# What is the range of angles you want to ignore?
+# input_angle1, input_angle2 = input("Enter the range (two angles) to be excluded: ").split()
+#if input_angle1 and input_angle2 == int:
+
+Obj = Vision('..\..\Images\\new.jpg', 1)
 x0, y0 = Obj.first_center_position()
-print(x0, y0)
+# print(x0, y0)
 
 # Need to return data separately into x_data and y_data
 inner_points, outer_points = Obj.inner_outer_points()
 
-trial = RANSAC_Half_Circle(Obj,inner_points, outer_points, x0, y0)
-trial.circle_detection()
-# ransac = RANSAC_Full_Circle(Obj, inner_points, outer_points, 50)
-# final_inner, final_outer = ransac.outlier_remover()
+# Obj.file_creator()
 
-'''
-Need to make a file system that deletes and adds files/images every iteration.
-'''
-# Connecting all of the filtered inner and outer points of the coil, excluding the tail points.
-# ransac.point_connector(final_inner, final_outer)
+# Removing outliers purely
+OUTLIER = Outlier_Detection(Obj,inner_points, outer_points, x0, y0)
+final_inner_points, final_outer_points, final_outer_radius = OUTLIER.circle_detection()
+OUTLIER.circle_defection(final_outer_radius, final_outer_points)
+
+ransac = RANSAC(Obj, OUTLIER, final_inner_points, final_outer_points, 100)
+final_inner, final_outer = ransac.outlier_remover()
+
+
 

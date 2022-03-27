@@ -1,18 +1,27 @@
+'''
+Explanation of the calculation can be found here. https://darkpgmr.tistory.com/60
+
+True Ransac algorithm to run the points
+'''
+
 from Vision import Vision
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import inv
 
-class RANSAC_Full_Circle(Vision):
+from Outlier_Circle_Remover import Outlier_Detection
+
+class RANSAC(Vision):
     '''
     Inspired from: https://github.com/SeongHyunBae
     '''
 
-    def __init__(self, Obj, innerpoints, outerpoints, n_iteration):
+    def __init__(self, Obj, OUTLIER, innerpoints, outerpoints, n_iteration):
         # trial run
         self.inner_points = innerpoints
         self.outer_points = outerpoints
         self.obj = Obj
+        self.obj1 = OUTLIER
 
         self.x1_inner = innerpoints[:, 0]
         self.y1_inner = innerpoints[:, 1]
@@ -35,7 +44,10 @@ class RANSAC_Full_Circle(Vision):
         else:
             print('Error')
 
+        # print("length of sample data going into RANSAC", len(sample_dataX))
+
         # getting three data points from the sample
+        # TODO: Need to make a conditional that makes sure the three random points are not the same.
         while True:
             ran_samples = np.random.randint(len(sample_dataX))
 
@@ -46,8 +58,6 @@ class RANSAC_Full_Circle(Vision):
 
             if count == 3:
                 break
-
-        # print(sample)
         return sampling_points
 
     def model_create(self, sampling_points):
@@ -55,27 +65,35 @@ class RANSAC_Full_Circle(Vision):
         :param sampling_points:
         :return: Values for the three (a,b,c) sampling points through matrix calculation
         '''
-
         pt1 = sampling_points[0]
         pt2 = sampling_points[1]
         pt3 = sampling_points[2]
 
+
         # calculating A, B, C value from three points by using matrix
-        # TODO Need to understand this code
+        '''
+        https://darkpgmr.tistory.com/60, explanation for the calculation for the code
+        '''
         a = np.array([[pt2[0] - pt1[0], pt2[1] - pt1[1]], [pt3[0] - pt2[0], pt3[1] - pt2[1]]])
         b = np.array([[pt2[0] ** 2 - pt1[0] ** 2 + pt2[1] ** 2 - pt1[1] ** 2],
                       [pt3[0] ** 2 - pt2[0] ** 2 + pt3[1] ** 2 - pt2[1] ** 2]])
-        # TODO There is problem with the inverse operation on the code
-        inv_A = inv(a)
-        c_x, c_y = np.dot(inv_A, b) / 2
-        c_x, c_y = c_x[0], c_y[0]
-        r = np.sqrt((c_x - pt1[0]) ** 2 + (c_y - pt1[1]) ** 2)
-        return c_x, c_y, r
+
+
+        try:
+            inv_A = inv(a)
+            c_x, c_y = np.dot(inv_A, b) / 2
+            c_x, c_y = c_x[0], c_y[0]
+            r = np.sqrt((c_x - pt1[0]) ** 2 + (c_y - pt1[1]) ** 2)
+            return c_x, c_y, r
+        except:
+            return None
+
 
     def evaluate_model(self, model, sample):
         d = 0
         c_x, c_y, r = model
 
+        # print(c_y, c_x, r)
         '''
         Need to go over the this RANSAC algorithm
         '''
@@ -105,22 +123,24 @@ class RANSAC_Full_Circle(Vision):
         '''
         for i in range(self.n):
             model = self.model_create(self.random_sampling(sample))
-            d_temp = self.evaluate_model(model, sample)
+            if model is not None:
+                d_temp = self.evaluate_model(model, sample)
 
-            if self.d_min > d_temp:
-                if sample == 'inner':
-                    self.best_model_inner = model
-                    self.d_min = d_temp
-                elif sample == 'outer':
-                    self.best_model_outer = model
-                    self.d_min = d_temp
-                else:
-                    print("error")
+                if self.d_min > d_temp:
+                    if sample == 'inner':
+                        self.best_model_inner = model
+                        self.d_min = d_temp
+                    elif sample == 'outer':
+                        self.best_model_outer = model
+                        self.d_min = d_temp
+                    else:
+                        print("error")
     def plot_points(self, point1,point2, rad1, point3, point4,rad2):
 
-        plt.scatter(self.x1_inner, self.y1_inner, c='red', marker='o', label='data')
-        plt.scatter(self.x2_outer, self.y2_outer, c='blue', marker='o', label='data')
+        # plt.scatter(self.x1_inner, self.y1_inner, c='red', marker='o', label='data')
+        # plt.scatter(self.x2_outer, self.y2_outer, c='blue', marker='o', label='data')
 
+        plt.figure("Final Diagram for RANSAC!")
         # show result
         circle = plt.Circle((point1, point2), radius=rad1, color='r', fc='y', fill=False)
         plt.gca().add_patch(circle)
@@ -129,7 +149,7 @@ class RANSAC_Full_Circle(Vision):
         circle = plt.Circle((point3, point4), radius=rad2, color='r', fc='y', fill=False)
         plt.gca().add_patch(circle)
 
-        plt.figure()
+
         outer_points = np.array(self.final_outer_points)
         inner_points = np.array(self.final_inner_points)
         # tail_inner_points = np.array(self.final_tail_points)
@@ -173,7 +193,7 @@ class RANSAC_Full_Circle(Vision):
         for point in test_list:
             dist = np.hypot(point[0] - point3, point[1] - point4)
             # 0.05 is the percentage offset.
-            if dist < 1.1 * rad2 and dist > 0.9 * rad2:
+            if dist < 1.05 * rad2 and dist > 0.98 * rad2:
                 final_inner_points.append(point)
         self.final_inner_points = final_inner_points
 
