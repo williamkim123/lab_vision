@@ -124,24 +124,15 @@ class Vision:
             plt.imshow(self.resized_img)
             plt.plot([self.x0, point[0]], [self.y0, point[1]], 'r')
 
-            # mohammad
+            # Plot the intensity to see the the changes
             # plt.figure()
             # plt.plot(a[:,2])
             # plt.plot(x1)
 
-            # mohammad
             a[a[:, 2] < self.black_white_threshold, 2] = 0
             a[a[:, 2] > self.black_white_threshold, 2] = 255
 
             x1 = np.diff(a[:, 2])
-
-            # Run the file creator here, and import the unfiltered inner_points, outer_points and intensity s
-            # self.file_creator(np.array(intensity))
-            # TODO: Need to adjust the code so that it only takes in the distance instead of threshold.
-            # for i, intensity_value in enumerate(intensity[:]):
-            #     print("Intensity values", intensity_value[2])
-            #     d_measurement = np.hypot(self.x0, intensity_value[0])
-
 
             # Finding the outlier and inlier points using local min/max
             # Only storing the data points that we want to append onto the list
@@ -150,11 +141,12 @@ class Vision:
             x2 = x1.copy()
             # Difference of intensity.
             # x2[x2 > -5] = 0
+
             # self.outer_points.append(a[np.argmin(x1), :2])
-            # Flipping the array and going backwards for the outer points and subtracting it from the real shape to obtain the actual index
+            # Flipping the array and going backwards for the outer (blue) points and subtracting it from the real shape to obtain the actual index
             index = x2.shape[0] - np.argmin(np.flip(x2))
-            # if index < 200:
-            #     continue
+
+
             # Adding the points onto the rays diagram
             self.outer_points.append(a[index, :2])
             plt.plot(self.inner_points[-1][0], self.inner_points[-1][1], 'ro')
