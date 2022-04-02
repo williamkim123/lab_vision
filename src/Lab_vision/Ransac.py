@@ -69,7 +69,6 @@ class RANSAC(Vision):
         pt2 = sampling_points[1]
         pt3 = sampling_points[2]
 
-
         # calculating A, B, C value from three points by using matrix
         '''
         https://darkpgmr.tistory.com/60, explanation for the calculation for the code
@@ -77,8 +76,7 @@ class RANSAC(Vision):
         a = np.array([[pt2[0] - pt1[0], pt2[1] - pt1[1]], [pt3[0] - pt2[0], pt3[1] - pt2[1]]])
         b = np.array([[pt2[0] ** 2 - pt1[0] ** 2 + pt2[1] ** 2 - pt1[1] ** 2],
                       [pt3[0] ** 2 - pt2[0] ** 2 + pt3[1] ** 2 - pt2[1] ** 2]])
-
-
+        # Catch the error if two or more points are the same or the triangle is very small for it to take the inverse of the three random points.
         try:
             inv_A = inv(a)
             c_x, c_y = np.dot(inv_A, b) / 2
@@ -218,4 +216,8 @@ class RANSAC(Vision):
         plt.plot(x, y, c='g', linewidth=7.0)
         plt.plot(x1, y1, c= 'r', linewidth=7.0)
         plt.show()
-        # print(type(self.inner_points))
+
+    def change_of_circle(self):
+        '''
+        After final circle is drawn
+        '''

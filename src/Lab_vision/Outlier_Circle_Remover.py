@@ -6,7 +6,8 @@
 from Vision import Vision
 import matplotlib.pyplot as plt
 import numpy as np
-
+from scipy import ndimage
+import math
 
 class Outlier_Detection(Vision):
     '''
@@ -76,21 +77,14 @@ class Outlier_Detection(Vision):
         final_radius = np.array(guess_radius)[np.where(np.array(scores) == np.max(scores))[0]].mean()
 
         #final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius - 10, np.array(distance_radius) < final_radius + 20))[0]]
-        final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius * 0.9,np.array(distance_radius) < final_radius * 1.1))[0]]
+        final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius * 0.95,np.array(distance_radius) < final_radius * 1.2))[0]]
 
         return final_radius, final_points
 
     '''
-    After taking seval images should be able to compare differences between the coil through here.
+    *** After taking seval images should be able to compare differences between the coil through here ***
     '''
-
-    def circle_defection(self, final_outer_radius, final_outer_points):
-        '''
-        Check how much the circles change everytime you run the script.
-        Check out the portion of the circle with the greatest area
-        1) Take the sum of differences from the first center point to the rest of other points
-        2) Do the same thing with the radius setting the first radius as the value for comparison.
-        '''
+    def circle_defect(self, final_outer_radius, final_outer_points):
 
         # print(final_outer_radius)
         # print("These are the final outer points from outlier remover for outer points", final_outer_points)
@@ -115,17 +109,48 @@ class Outlier_Detection(Vision):
         print("Defect points", defect_points)
 
         final_plot_points = np.array(defect_points)
-        plt.figure("tail position")
 
+        '''
+        1) To do this draw the point on the image itself
+        '''
+        # self.center_of_mass = np.array(ndimage.center_of_mass(final_plot_points))
+        # print(self.center_of_mass, "center of mass coord for tail")
+        '''
+        Finding the average of the points
+        '''
+        # TODO: Look into shortening this code
+        self.point_of_defect = np.array(final_plot_points).mean(axis=1)
+        print(self.point_of_defect.shape)
+
+        print("Defect Points", self.point_of_defect,)
+
+        plt.figure("tail position")
         plt.imshow(self.obj.resized_img)
         plt.plot(final_plot_points[:, 0], final_plot_points[:, 1], 'bo')
         plt.show()
 
-    def change_center_points(self):
+        return np.array(self.point_of_defect)
+
+    def angle_between_points(self):
         '''
-        Tells in which angle the defection occurs. Center of mass
+        Printing the angle between two points the average coordinate of where the defect(tail) is to that
+        of the initial center of the coil.
         '''
-        pass
+        # Need to see where the center of mass compared to the image is
+        print(type(self.point_of_defect))
+        center_coord = np.array([self.x0, self.y0])
+        print(center_coord)
+
+        dist = np.hypot(self.point_of_defect[0] - self.x0, self.point_of_defect[1] - self.y0)
+        deltaY = (self.point_of_defect[1] - self.y0)**2
+        deltaX = (self.point_of_defect[0] - self.x0)
+        # Finding the angle of defect
+        print(dist)
+        radian = math.atan2(deltaY, deltaX)
+        degree = radian*(180/math.pi)
+        print(f"The defect is approximately located at {round(degree,2)} degrees")
+
+
 
 
 
