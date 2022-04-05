@@ -16,16 +16,13 @@ from Outlier_Circle_Remover import Outlier_Detection
 from Outlier_Detection import OUTILER_DEFECT
 import numpy as np
 
-# What is the range of angles you want to ignore?
-# input_angle1, input_angle2 = input("Enter the range (two angles) to be excluded: ").split()
-#if input_angle1 and input_angle2 == int:
 
 final_inner_outlier =  []
 final_outer_outlier = []
 final_outlier_radius = []
 
-for black_white_threshold in range(40, 100, 100):
-    Obj = Vision('..\..\Images\\image_t2.jpg', 1, black_white_threshold, [[270, 360], [0, 90]])
+for black_white_threshold in range(40, 100, 10):
+    Obj = Vision('..\..\Images\\image_t2.jpg', 1, black_white_threshold, [[270, 390], [0, 0]])
     x0, y0 = Obj.first_center_position()
     # print(x0, y0)
 

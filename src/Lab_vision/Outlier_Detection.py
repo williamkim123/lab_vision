@@ -35,6 +35,7 @@ class OUTILER_DEFECT(RANSAC):
     def four_quadrants(self):
         '''
         Devide the whole image into four quadrant upper-right, upper-left, lower-right and lower-left.
+        # TODO: Complete this this task by Friday
         '''
 
         # height = self.height

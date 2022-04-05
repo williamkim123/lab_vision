@@ -9,6 +9,7 @@
 6) Connect the inlier and outlier using Ransac (3points for sphere, 5 points for ellipse)
 7) Most accurate parameter of the shape.
 '''
+# TODO: Need to add third angle of ignorance for both inner and outer.
 
 # Computer Vision libary
 import cv2
@@ -40,37 +41,47 @@ class Vision:
         self.black_white_threshold = black_white_threshold
         self.angle_of_detection = angle_of_detection
 
+    def resize_with_aspect_ratio(self, image, width=None, height=None, inter=cv2.INTER_AREA):
+        '''
+        Maintaining aspect ratio for images
+        https://stackoverflow.com/questions/35180764/opencv-python-image-too-big-to-display
+        '''
+        dim = None
+        (h, w) = image.shape[:2]
+
+        # print(h, w)
+
+        if width is None and height is None:
+            return image
+        if width is None:
+            r = height / float(h)
+            dim = (int(w * r), height)
+        else:
+            r = width / float(w)
+            dim = (width, int(h * r))
+
+        return cv2.resize(image, dim, interpolation=inter)
 
     def first_center_position(self):
 
         # First import the image in grayscale
         self.img = cv2.imread(self.image_source, 0)
 
-        dimensions = self.img.shape
-        # print(f'Actual dimension of the image', {dimensions})
-        '''
-        self.height = self.img.shape[0]
-        self.width = self.img.shape[1]
-        '''
-        self.width = 800
-        self.height = 600
-        dimension = (self.width, self.height)
-        # print(dimension)
-        self.resized_img = cv2.resize(self.img, dimension, interpolation=cv2.INTER_LINEAR)
+        # Calling the resized image
+        self.resized_img = self.resize_with_aspect_ratio(self.img, width=800)
 
-        # Get the moments of the image and set that point as the initial point of the array
-        array_data = asarray(self.resized_img)
-        moment = cv2.moments(self.resized_img)
-        X = int(moment['m10'] / moment["m00"])
-        Y = int(moment["m01"] / moment["m00"])
-        # TODO this needs my attention
+        print("dimensions of the resized image - same aspect ratio", self.resized_img.shape)
+        # cv2.imshow('resize', self.resized_img)
+        # cv2.waitKey()
+
+        self.height = self.resized_img.shape[0]
+        self.width = self.resized_img.shape[1]
+        # print(self.height, self.width)
+
+        # User always needs to input the location of the center points.
         X = 322
         Y = 323
-        # cv2.circle(self.resized_img, (X,Y), 2, (205,114,101), 5)
-        # print(f' Moments Coordinate: ({X},{Y})')
-
-        # make moments a member
-        self.moments = ((X, Y))
+        #self.moments = ((X, Y))
         self.x0 = X
         self.y0 = Y
         return X, Y
@@ -94,7 +105,7 @@ class Vision:
         self.inner_points = []
         self.outer_points = []
         for angle in np.arange(360, 0, -self.angle_of_contact):
-            # TODO Look into why the angles are not working.
+
             if len(self.angle_of_detection) ==1:
                 if angle >= self.angle_of_detection[0] and angle <= self.angle_of_detection[1]:
                     endy = self.y0 + length * math.sin(math.radians(angle))
