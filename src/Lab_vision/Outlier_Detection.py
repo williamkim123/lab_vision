@@ -1,17 +1,57 @@
 '''
 This is a class to detect outliers and the data onto a separate file.
+# Tail/Outlier Detection
+TODO: Need to draw the rays again and detect the defect of the circle.
 '''
 from Vision import Vision
 from Ransac import RANSAC
-
+import matplotlib.pyplot as plt
 import numpy as np
 import math
+from bresenham import bresenham
 
 class OUTILER_DEFECT(RANSAC):
-    def __init__(self, Obj, ransac, final_defect_points):
+    def __init__(self, Obj, ransac, final_outer_points):
         self.obj = Obj
         self.ransac = ransac
-        self.final_defect_points = final_defect_points
+        self.final_defect_points = final_outer_points
+
+    def circle_defect(self, final_outer_radius, final_outer_points):
+        '''
+        Functions to print our defect points:
+        - Should return unfiltered points including the tail detection.
+        '''
+
+        print(self.outer_points, "These are the outer points")
+        plt.figure('circle defection figure')
+        plt.imshow(self.obj.resized_img)
+
+        plt.plot(self.outer_points[:, 0], self.outer_points[:, 1], 'bo')
+        plt.show()
+
+        defect_points = []
+        for point in self.outer_points:
+
+            distance_point = np.sqrt((point[0]-self.x0)**2 + (point[1]-self.y0)**2)
+            if distance_point > final_outer_radius * 1.05:
+                defect_points.append(point)
+        print("Defect points", defect_points)
+
+        final_plot_points = np.array(defect_points)
+        '''
+        Finding the average of the points
+        '''
+        self.point_of_defect = np.array(final_plot_points).mean(axis=1)
+        print(self.point_of_defect.shape)
+
+        print("Defect Points", self.point_of_defect,)
+
+        plt.figure("tail position")
+        plt.imshow(self.obj.resized_img)
+        plt.plot(final_plot_points[:, 0], final_plot_points[:, 1], 'bo')
+        plt.show()
+
+        return np.array(self.point_of_defect)
 
     def angle_between_points(self):
         '''
@@ -35,7 +75,6 @@ class OUTILER_DEFECT(RANSAC):
     def four_quadrants(self):
         '''
         Devide the whole image into four quadrant upper-right, upper-left, lower-right and lower-left.
-        # TODO: Complete this this task by Friday
         '''
 
         # height = self.height

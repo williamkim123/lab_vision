@@ -17,7 +17,10 @@ class RANSAC(Vision):
     '''
 
     def __init__(self, Obj, OUTLIER, innerpoints, outerpoints, n_iteration):
-        # trial run
+        '''
+        Note that the self.inner_points and self.outer_points are points that were imported from Outlier_Circle_Remover
+        after they have been already cleaned up
+        '''
         self.inner_points = innerpoints
         self.outer_points = outerpoints
         self.obj = Obj
@@ -35,6 +38,8 @@ class RANSAC(Vision):
         sampling_points = []
         saved_points = []
         count = 0
+
+        # Setting the sample points to differentiate between inner and outer points
         if sample =='outer':
             sample_dataX = self.x2_outer
             sample_dataY = self.y2_outer
@@ -134,7 +139,10 @@ class RANSAC(Vision):
                     else:
                         print("error")
     def plot_points(self, point1,point2, rad1, point3, point4,rad2):
-
+        '''
+        Ploting the a perfect theoretical circle of after center coordinate point1, point2, point2, point4 of the inner
+        and outer points have been found through RANSAC
+        '''
         # plt.scatter(self.x1_inner, self.y1_inner, c='red', marker='o', label='data')
         # plt.scatter(self.x2_outer, self.y2_outer, c='blue', marker='o', label='data')
 
@@ -147,7 +155,7 @@ class RANSAC(Vision):
         circle = plt.Circle((point3, point4), radius=rad2, color='r', fc='y', fill=False)
         plt.gca().add_patch(circle)
 
-
+        # List of points that were received from function after
         outer_points = np.array(self.final_outer_points)
         inner_points = np.array(self.final_inner_points)
         # tail_inner_points = np.array(self.final_tail_points)
@@ -172,6 +180,7 @@ class RANSAC(Vision):
         self.execute_ransac('outer')
         point1, point2, rad1 = self.best_model_outer
 
+        self.d_min = 99999 # reset the min value for inner check
         self.execute_ransac('inner')
         point3, point4, rad2 = self.best_model_inner
 
@@ -180,18 +189,19 @@ class RANSAC(Vision):
         # Delete x2 outliers if the points are 5-10 increments outside radius(r) in the x-axis.
         for point in test_list:
             dist = np.hypot(point[0] - point1, point[1] - point2)
-            # above 3% of the radius and below 5% of original radius is the percentage offset.
+            # above 10% of the radius and below 5% of original radius is the percentage offset.
             if dist < 1.03 * rad1 and dist > 0.95 * rad1:
                 final_outer_points.append(point)
         self.final_outer_points = final_outer_points
 
+        # Repeating for the inner circle to take out/clean points
         test_list = np.array(self.inner_points)
         final_inner_points = []
         # Delete x2 outliers if the points are 5-10 increments outside radius(r) in the x-axis.
         for point in test_list:
             dist = np.hypot(point[0] - point3, point[1] - point4)
             # 0.05 is the percentage offset.
-            if dist < 1.05 * rad2 and dist > 0.98 * rad2:
+            if dist < 1.1 * rad2 and dist > 0.9 * rad2:
                 final_inner_points.append(point)
         self.final_inner_points = final_inner_points
 
@@ -217,7 +227,3 @@ class RANSAC(Vision):
         plt.plot(x1, y1, c= 'r', linewidth=7.0)
         plt.show()
 
-    def change_of_circle(self):
-        '''
-        After final circle is drawn
-        '''

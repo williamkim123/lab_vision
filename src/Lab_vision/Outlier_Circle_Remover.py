@@ -6,7 +6,6 @@
 from Vision import Vision
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage
 import math
 
 class Outlier_Detection(Vision):
@@ -26,7 +25,6 @@ class Outlier_Detection(Vision):
     def circle_detection(self):
 
         # Adding points outside of the circle for the outer points
-        # TODO: Look into this
         points_outside = []
 
         # Calculating the distance to the coordinates of the outer points
@@ -39,22 +37,22 @@ class Outlier_Detection(Vision):
 
         plt.figure("Diagram of Outlier points from Class Outlier_Detection")
         plt.imshow(self.obj.resized_img)
-        circle = plt.Circle((self.x0, self.y0), radius=final_outer_radius, color='r', fc='y', fill=False)
-        circle1 = plt.Circle((self.x0, self.y0), radius=final_inner_radius, color='r', fc='y', fill=False)
-
-        plt.gca().add_patch(circle)
-        plt.gca().add_patch(circle1)
+        # circle = plt.Circle((self.x0, self.y0), radius=final_outer_radius, color='r', fc='y', fill=False)
+        # circle1 = plt.Circle((self.x0, self.y0), radius=final_inner_radius, color='r', fc='y', fill=False)
+        # plt.gca().add_patch(circle)
+        # plt.gca().add_patch(circle1)
 
         plt.plot(final_outer_points[:, 0], final_outer_points[:, 1], 'bo')
         plt.plot(final_inner_points[:, 0], final_inner_points[:, 1], 'ro')
         plt.show()
 
-        # TODO: Need to return the new center of the circle of the outer points as well
-
         return final_inner_points, final_outer_points, final_outer_radius
 
     def clean_points(self, points):
 
+        '''
+        Finding random radi to obtain the distance in order to set a threshold for measurement.
+        '''
         distance_radius = []
         for point in points:
             distance_radius.append(np.hypot(point[0] - self.x0, point[1] - self.y0))
@@ -66,18 +64,18 @@ class Outlier_Detection(Vision):
         scores = []
 
         while guess_radius[-1] <= self.obj.height // 2:
-            # Taking out all the pixels 20 down and 20 up from the distance of the radius
-            # scores.append(np.where(np.logical_and(np.array(distance_radius) > guess_radius[-1] -20 , np.array(distance_radius) < guess_radius[-1] + 22))[0].shape[0])
-            scores.append(np.where(np.logical_and(np.array(distance_radius) > guess_radius[-1] * 0.95, np.array(distance_radius) < guess_radius[-1] * 1.1))[0].shape[0])
+            # TODO: Need to look into what is the best method for this
+            # Taking out all the pixels 20 down and 100 up from the distance of the radius
+            scores.append(np.where(np.logical_and(np.array(distance_radius) > guess_radius[-1] -20 , np.array(distance_radius) < guess_radius[-1] + 100))[0].shape[0])
+            #scores.append(np.where(np.logical_and(np.array(distance_radius) > guess_radius[-1] * 0.95, np.array(distance_radius) < guess_radius[-1] * 1.1))[0].shape[0])
             guess_radius.append(guess_radius[-1] + 1)
 
         # final_radius = guess_radius[np.argmax(scores)]
-        # TODO: Is this final radius good enough.
         #Taking the average radius of the scores as there are some numbers.
         final_radius = np.array(guess_radius)[np.where(np.array(scores) == np.max(scores))[0]].mean()
 
-        #final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius - 10, np.array(distance_radius) < final_radius + 20))[0]]
-        final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius * 0.95,np.array(distance_radius) < final_radius * 1.2))[0]]
+        final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius - 20, np.array(distance_radius) < final_radius + 100))[0]]
+        #final_points = points[np.where(np.logical_and(np.array(distance_radius) > final_radius * 0.95,np.array(distance_radius) < final_radius * 1.2))[0]]
 
         return final_radius, final_points
 
@@ -88,7 +86,6 @@ class Outlier_Detection(Vision):
 
         # print(final_outer_radius)
         # print("These are the final outer points from outlier remover for outer points", final_outer_points)
-
         # 1) Finding all the points outside of the outer circle
         # 2) Categorizing them as defects, min 10 points with distance of each being < 10, using convex hull!
         # 3) Finding the center of mass of the defect points and using trig seeing where it is approximately to origin of point
@@ -100,11 +97,14 @@ class Outlier_Detection(Vision):
         plt.plot(self.outer_points[:, 0], self.outer_points[:, 1], 'bo')
         plt.show()
 
+        # Making a separate list to store all the points that are outside of the circle
         defect_points = []
         for point in self.outer_points:
 
+            # Distance measuremets of the outer points
             distance_point = np.sqrt((point[0]-self.x0)**2 + (point[1]-self.y0)**2)
-            if distance_point > final_outer_radius * 1.05:
+            # TODO: Needs to look into how this parameter can be optimized as well.
+            if distance_point > final_outer_radius * 1.1:
                 defect_points.append(point)
         print("Defect points", defect_points)
 
@@ -118,7 +118,6 @@ class Outlier_Detection(Vision):
         '''
         Finding the average of the points
         '''
-        # TODO: Look into shortening this code
         self.point_of_defect = np.array(final_plot_points).mean(axis=1)
         print(self.point_of_defect.shape)
 

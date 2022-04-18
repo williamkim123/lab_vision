@@ -9,26 +9,19 @@
 6) Connect the inlier and outlier using Ransac (3points for sphere, 5 points for ellipse)
 7) Most accurate parameter of the shape.
 '''
-# TODO: Need to add third angle of ignorance for both inner and outer.
-
+# TODO: Need to add third angle of ignorance for both inner and outer, might have to separate the angle of interest for inner and outer points
 # Computer Vision libary
 import cv2
 import numpy as np
 import imutils
-from numpy import asarray
 
-import scipy.ndimage
 import matplotlib.pyplot as plt
 import math
 from scipy.signal import argrelextrema
 from bresenham import bresenham
 
-# RANSAC algorithm
-from numpy.linalg import inv
-
 # Saving points into a file for the user to manually save
 import csv
-
 
 class Vision:
     '''
@@ -63,7 +56,9 @@ class Vision:
         return cv2.resize(image, dim, interpolation=inter)
 
     def first_center_position(self):
-
+        '''
+        This function returns the dimensions of the resized image with the maintained aspect ratio.
+        '''
         # First import the image in grayscale
         self.img = cv2.imread(self.image_source, 0)
 
@@ -98,14 +93,19 @@ class Vision:
 
         # Hardcoded the ray values to be 75 percent of the total height of the image.
         length = self.height * 3 / 4
-        '''
-        Is this because it is not finding the local minima?
-        '''
         points = []
         self.inner_points = []
         self.outer_points = []
         for angle in np.arange(360, 0, -self.angle_of_contact):
+            '''
+            Note that that for some of the images the angle of ignorance should be hardcoded.
+            '''
+            if angle > 55 and angle < 75:
+                continue
+            # elif angle < 270:
+            #     continue
 
+            # Input angles from computer_vision main script.
             if len(self.angle_of_detection) ==1:
                 if angle >= self.angle_of_detection[0] and angle <= self.angle_of_detection[1]:
                     endy = self.y0 + length * math.sin(math.radians(angle))
@@ -121,6 +121,7 @@ class Vision:
 
         for i, point in enumerate(points[:]):
             p = list(bresenham(self.x0, self.y0, int(point[0]), int(point[1])))
+            # Make a list to store the intensity for each of the points along the points that the rays are drawn over.
             intensity = []
             for pnt in p:
                 # Setting the boundaries for where the rays should reach
@@ -144,9 +145,10 @@ class Vision:
             a[a[:, 2] > self.black_white_threshold, 2] = 255
 
             x1 = np.diff(a[:, 2])
-
-            # Finding the outlier and inlier points using local min/max
-            # Only storing the data points that we want to append onto the list
+            '''
+            Finding the outlier and inlier points using local min/max
+            Only storing the data points that we want to append onto the list
+            '''
             # self.inner_points.append(a[np.argmax(x1), :2])
             self.inner_points.append(a[np.argmax(x1) + 1, :2])
             x2 = x1.copy()
