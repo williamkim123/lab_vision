@@ -33,6 +33,7 @@ class Vision:
         self.angle_of_contact = angle_of_contact
         self.black_white_threshold = black_white_threshold
         self.angle_of_detection = angle_of_detection
+        self.get_first_center_coords()
 
     def resize_with_aspect_ratio(self, image, width=None, height=None, inter=cv2.INTER_AREA):
         '''
@@ -55,7 +56,7 @@ class Vision:
 
         return cv2.resize(image, dim, interpolation=inter)
 
-    def first_center_position(self):
+    def get_first_center_coords(self):
         '''
         This function returns the dimensions of the resized image with the maintained aspect ratio.
         '''
@@ -74,12 +75,12 @@ class Vision:
         # print(self.height, self.width)
 
         # User always needs to input the location of the center points.
-        X = 322
-        Y = 323
+        X = 403
+        Y = 232
         #self.moments = ((X, Y))
         self.x0 = X
         self.y0 = Y
-        return X, Y
+        # return X, Y
 
     def inner_outer_points(self):
         '''
@@ -92,7 +93,7 @@ class Vision:
         # length = 300
 
         # Hardcoded the ray values to be 75 percent of the total height of the image.
-        length = self.height * 3 / 4
+        length = self.height * 1/2
         points = []
         self.inner_points = []
         self.outer_points = []
@@ -100,12 +101,12 @@ class Vision:
             '''
             Note that that for some of the images the angle of ignorance should be hardcoded.
             '''
-            if angle > 55 and angle < 75:
-                continue
+            # if angle > 55 and angle < 75:
+            #     continue
             # elif angle < 270:
             #     continue
 
-            # Input angles from computer_vision main script.
+            # Input angles from computer_vision main script, [270, 360], [0,90]
             if len(self.angle_of_detection) ==1:
                 if angle >= self.angle_of_detection[0] and angle <= self.angle_of_detection[1]:
                     endy = self.y0 + length * math.sin(math.radians(angle))
@@ -124,7 +125,7 @@ class Vision:
             # Make a list to store the intensity for each of the points along the points that the rays are drawn over.
             intensity = []
             for pnt in p:
-                # Setting the boundaries for where the rays should reach
+                # Setting the boundaries for where the rays should reach/should never pass these set parameters.
                 if pnt[0] >= self.width or pnt[1] >= self.height or pnt[0] < 0 or pnt[1] < 0:
                     continue
                 else:

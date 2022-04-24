@@ -49,15 +49,16 @@ def vision_system():
     final_outer_outlier = []
     final_outlier_radius = []
 
-    # Running a for loop that sets the threshold for intensity from  40 to 100 of the image.
+    # Running a for loop that sets the threshold for intensity from  40 to 100 of the image, specifically for RGB and grayscale images.
     for black_white_threshold in range(40, 100, 100):
         '''
         Arguments for the main class vision is the image source, angle between each rays, range for threshold of the image - not needed for black and white,
         Angle of interest for the rays.
         '''
         # Obj = Vision(img_file, 1, black_white_threshold, [[270, 390], [0, 100]])
-        Obj = Vision('..\..\Images\\black_white.jpg', 1, black_white_threshold, [[270, 390], [0, 100]])
-        x0, y0 = Obj.first_center_position()
+        Obj = Vision('..\..\Images\\frame2155.jpg', 1, black_white_threshold, [[0, 181], [0, 0]])
+        x0 = Obj.x0
+        y0 = Obj.y0
         # print(x0, y0)
 
         # Need to return data separately into x_data and y_data
@@ -95,12 +96,15 @@ def vision_system():
 
     # Setting the ransac iteration number to be 100
     ransac = RANSAC(Obj, OUTLIER, inner_output, outer_points_output, 100)
-    final_inner, final_outer = ransac.outlier_remover()
+    # These are the parameters of the new ransac circle.
+    final_inner, final_outer, new_center_outer, new_center_inner= ransac.outlier_remover()
     # ransac.point_connector(final_inner, final_outer)
 
     '''
     Class for circularity test
     '''
+    circularity_measurement = CIRCULARITY_MEASUREMENT(Obj, final_inner, final_outer, new_center_outer, new_center_inner)
+    circularity_measurement.line_drawing()
 
     # TODO: Need to find a better parameter to find the defect position.
     # output for detecting the defect.

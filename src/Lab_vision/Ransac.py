@@ -122,7 +122,7 @@ class RANSAC(Vision):
 
     def execute_ransac(self, sample):
         '''
-        Finding the optimal model
+        Finding the optimal model for both the inner and outer circles
         '''
         for i in range(self.n):
             model = self.model_create(self.random_sampling(sample))
@@ -207,7 +207,8 @@ class RANSAC(Vision):
 
         self.plot_points(point1,point2,rad1,point3,point4,rad2)
 
-        return self.final_inner_points, self.final_outer_points
+        # Note, that point1, point2 belong to the new outer points, and point3, point3 belongs to the new inner center points
+        return self.final_inner_points, self.final_outer_points, (point1, point2), (point3, point4)
 
     def point_connector(self, final_inner, final_outer):
         '''
